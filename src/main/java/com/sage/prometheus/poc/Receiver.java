@@ -2,7 +2,6 @@ package com.sage.prometheus.poc;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -10,10 +9,6 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-
-/**
- * Created by phil on 17/12/16.
- */
 @Component
 public class Receiver
 {
@@ -29,16 +24,26 @@ public class Receiver
 
     public void receiveMessage(String message) throws Exception
     {
-        logger.info("MESSAGE RECEIVED: " + message);
-        long start = System.currentTimeMillis();
+        List<Future<List<Transaction>>> futures = setupWorkers();
 
+        awaitResults(futures);
+
+        Map<String, BigDecimal> aggregatedNominals = collectResults(futures);
+    }
+
+    private List<Future<List<Transaction>>> setupWorkers() throws InterruptedException
+    {
         List<Future<List<Transaction>>> futures = new ArrayList<>();
 
         for(int i = 0; i < MAX_WORKERS; i++)
         {
             futures.add(service.getTransactions(MAX_WORKERS, i + 1));
         }
+        return futures;
+    }
 
+    private void awaitResults(List<Future<List<Transaction>>> futures) throws InterruptedException
+    {
         boolean someNotDone = true;
 
         while(someNotDone)
@@ -55,40 +60,17 @@ public class Receiver
             }
             Thread.sleep(10);
         }
-
-        long end = System.currentTimeMillis();
-        String time = "" + (end - start) + "ms";
-
-
-        logger.info("Done getting records in: " + time);
-        start = end;
-        logger.info("Reducing the map...");
-
-        Map<String, BigDecimal> reducedNominals = reduce(futures);
-        end = System.currentTimeMillis();
-        time = "" + (end - start) + "ms";
-
-        logger.info("Done reducing in : " + time);
-
-        //logger.info("reducedNominals :\n" + new PrettyPrintMap<>(reducedNominals));
     }
 
-    private Map<String, BigDecimal> reduce(List<Future<List<Transaction>>> futures)
+    private Map<String, BigDecimal> collectResults(List<Future<List<Transaction>>> futures)
     {
-        Map<String, BigDecimal> results = new TreeMap<>();
+        List<Transaction> transactions = new ArrayList<>();
 
-        futures.forEach(future ->
+        futures.forEach((future) ->
         {
             try
             {
-                future.get().forEach(transaction ->
-                {
-                    results.computeIfPresent(transaction.getNominalCode(), (key, val) -> {
-                        return transaction.getAmount().add(val);
-                    });
-                    results.putIfAbsent(transaction.getNominalCode(), transaction.getAmount());
-
-                });
+                transactions.addAll(future.get());
             } catch (InterruptedException e)
             {
                 e.printStackTrace();
@@ -98,7 +80,6 @@ public class Receiver
             }
         });
 
-        return results;
+        return Aggregator.aggregate(transactions);
     }
-
 }

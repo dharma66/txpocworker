@@ -16,6 +16,9 @@ public class Transaction
 
     public String getNominalCode()
     {
+        if(nominalCode == null)
+            return "";
+
         return nominalCode;
     }
 
@@ -36,6 +39,9 @@ public class Transaction
 
     public BigDecimal getAmount()
     {
+        if(amount == null)
+            return new BigDecimal(0).setScale(2);
+
         return amount;
     }
 

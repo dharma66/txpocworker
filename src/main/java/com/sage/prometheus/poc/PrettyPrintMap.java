@@ -3,9 +3,6 @@ package com.sage.prometheus.poc;
 import java.util.Iterator;
 import java.util.Map;
 
-/**
- * Created by phil on 20/12/16.
- */
 public class PrettyPrintMap<K, V>
 {
     private Map<K, V> map;
