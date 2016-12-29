@@ -9,9 +9,6 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Created by phil on 28/12/16.
- */
 class AggregatorTest
 {
     @Test

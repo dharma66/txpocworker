@@ -2,15 +2,11 @@ package com.sage.prometheus.poc;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Created by phil on 23/12/16.
- */
 class PrettyPrintMapTest
 {
     @Test
