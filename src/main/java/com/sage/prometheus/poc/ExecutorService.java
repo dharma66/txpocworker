@@ -29,52 +29,65 @@ public class ExecutorService
     private static final Logger logger = LoggerFactory.getLogger(ExecutorService.class);
     private static final boolean stub = false;
 
-    private static final long MAX_PAGES = 1; //Long.MAX_VALUE;
+    private static final long MAX_PAGES = 4; //Long.MAX_VALUE;
 
     @Async
     public Future<List<Transaction>> getTransactions(int pageStep, int offset) throws InterruptedException
     {
-        if(stub)
+        if(offset <= MAX_PAGES)
         {
-            return mockMethod(pageStep, offset);
+            if (stub)
+            {
+                return pretendToReadData(pageStep, offset);
+            } else
+            {
+                return readData(pageStep, offset);
+            }
         }
         else
         {
-            return realMethod(pageStep, offset);
+            return new AsyncResult<>(new ArrayList<>());
         }
     }
 
-    private Future<List<Transaction>> realMethod(int pageStep, int offset)
+    private Future<List<Transaction>> readData(int pageStep, int offset)
     {
         long page = offset;
+
         String uri = String.format("http://localhost:8080/transactions?size=1000&page=%d", page);
 
         RestTemplate template = restTemplate();
 
         ResponseEntity<PagedResources<Transaction>> result = template.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<PagedResources<Transaction>>(){});
         PagedResources<Transaction> resources = result.getBody();
-        List<Transaction> transactions = new ArrayList<>(resources.getContent());
 
         long totalPages = resources.getMetadata().getTotalPages();
+        if(MAX_PAGES < totalPages) totalPages = MAX_PAGES;
 
-        while((page + pageStep < totalPages) && page < MAX_PAGES)
+        logger.info("Got page: " + page);
+
+        List<Transaction> transactions = new ArrayList<>(resources.getContent());
+
+        while(page + pageStep < totalPages)
         {
             page = page + pageStep;
             uri = String.format("http://localhost:8080/transactions?size=1000&page=%d", page);
-            getPage(uri, template, transactions);
+            getPageData(uri, template, transactions);
+            logger.info("Got page: " + page);
         }
 
+        logger.info("Got a total of " + transactions.size() + " transactions");
         return new AsyncResult<>(transactions);
     }
 
-    private void getPage(String uri, RestTemplate template, List<Transaction> transactions)
+    private void getPageData(String uri, RestTemplate template, List<Transaction> transactions)
     {
         ResponseEntity<PagedResources<Transaction>> results = template.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<PagedResources<Transaction>>(){});
         PagedResources<Transaction> res = results.getBody();
         transactions.addAll(new ArrayList<>(res.getContent()));
     }
 
-    private Future<List<Transaction>> mockMethod(int pageStep, int offset)
+    private Future<List<Transaction>> pretendToReadData(int pageStep, int offset)
     {
         try
         {

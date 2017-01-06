@@ -2,6 +2,7 @@ package com.sage.prometheus.poc;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -24,11 +25,24 @@ public class Receiver
 
     public void receiveMessage(String message) throws Exception
     {
+        logger.info("Received message: " + message);
+        long start = System.currentTimeMillis();
+
         List<Future<List<Transaction>>> futures = setupWorkers();
 
         awaitResults(futures);
 
+        long end = System.currentTimeMillis();
+        logger.info("Got data in: " + (end - start) + "ms");
+
+        start = System.currentTimeMillis();
+
         Map<String, BigDecimal> aggregatedNominals = collectResults(futures);
+
+        end = System.currentTimeMillis();
+        logger.info("Aggregated data in: " + (end - start) + "ms");
+        //logger.info("Aggregated data:");
+        //logger.info(new PrettyPrintMap(aggregatedNominals).toString());
     }
 
     private List<Future<List<Transaction>>> setupWorkers() throws InterruptedException

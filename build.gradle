@@ -31,5 +31,4 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-amqp')
 	compile('org.springframework.hateoas:spring-hateoas')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
-	testcompile('org.springframework.hateoas:spring-hateoas')
 }

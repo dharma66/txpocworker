@@ -48,6 +48,7 @@ public class WorkerApplication extends AsyncConfigurerSupport
         container.setConnectionFactory(connectionFactory);
         container.setQueueNames(queueName);
         container.setMessageListener(listenerAdapter);
+        container.setConcurrentConsumers(4);
 
         return container;
     }

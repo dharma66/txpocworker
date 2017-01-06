@@ -7,6 +7,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -31,12 +32,18 @@ public class Runner implements CommandLineRunner
     @Override
     public void run(String... args) throws Exception
     {
-        for(int i = 1; i < 10; i++)
+        int numRequests = 20;
+        logger.info("\n\n\n\nPosting " + numRequests + " messages");
+
+        long start = System.currentTimeMillis();
+        for(int i = 0; i < numRequests; i++)
         {
-            rabbitTemplate.convertAndSend(WorkerApplication.queueName, "Hello from RabbitMQ - " + i);
-            logger.info("Posted mesage " + i);
+            String uuid = UUID.randomUUID().toString();
+            rabbitTemplate.convertAndSend(WorkerApplication.queueName, uuid);
+            logger.info("Posted mesage:    " + uuid);
         }
 
+        logger.info("Messages posted in " + (System.currentTimeMillis() - start) + "ms");
         //context.close();
     }
 }
