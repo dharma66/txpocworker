@@ -8,7 +8,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by phil on 17/12/16.
@@ -32,7 +31,7 @@ public class Runner implements CommandLineRunner
     @Override
     public void run(String... args) throws Exception
     {
-        int numRequests = 20;
+        int numRequests = 1;
         logger.info("\n\n\n\nPosting " + numRequests + " messages");
 
         long start = System.currentTimeMillis();

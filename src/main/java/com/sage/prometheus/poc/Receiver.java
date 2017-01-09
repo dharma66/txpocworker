@@ -2,6 +2,7 @@ package com.sage.prometheus.poc;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -14,34 +15,47 @@ public class Receiver
 {
     private static final Logger logger = LoggerFactory.getLogger(Receiver.class);
     private final ExecutorService service;
-    private static final int MAX_WORKERS = 4;
+    private static final int MAX_WORKERS = 1;
 
     public Receiver(ExecutorService service)
     {
         this.service = service;
     }
 
+    @Autowired
+    private SummaryRepository repo;
 
-    public void receiveMessage(String message) throws Exception
+    public void receiveMessage(String requestId) throws Exception
     {
-        logger.info("Received message: " + message);
-        long start = System.currentTimeMillis();
+        try
+        {
+            logger.info("Received requestId: " + requestId);
+            long start = System.currentTimeMillis();
 
-        List<Future<List<Transaction>>> futures = setupWorkers();
+            List<Future<List<Transaction>>> futures = setupWorkers();
 
-        awaitResults(futures);
+            awaitResults(futures);
 
-        long end = System.currentTimeMillis();
-        logger.info("Got data in: " + (end - start) + "ms");
+            long end = System.currentTimeMillis();
+            logger.info("Got data in: " + (end - start) + "ms");
 
-        start = System.currentTimeMillis();
+            start = System.currentTimeMillis();
 
-        Map<String, BigDecimal> aggregatedNominals = collectResults(futures);
 
-        end = System.currentTimeMillis();
-        logger.info("Aggregated data in: " + (end - start) + "ms");
-        //logger.info("Aggregated data:");
-        //logger.info(new PrettyPrintMap(aggregatedNominals).toString());
+            Map<String, BigDecimal> aggregatedNominals = collectResults(futures);
+            Summary summary = new Summary(requestId, aggregatedNominals);
+            repo.save(summary);
+
+            end = System.currentTimeMillis();
+            logger.info("Aggregated data in: " + (end - start) + "ms");
+            //logger.info("Aggregated data:");
+            //logger.info(new PrettyPrintMap(aggregatedNominals).toString());
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 
     private List<Future<List<Transaction>>> setupWorkers() throws InterruptedException

@@ -12,14 +12,13 @@ public class Aggregator
     {
         Map<String, BigDecimal> results = new TreeMap<>();
 
-            transactions.forEach(transaction ->
-            {
-                results.computeIfPresent(transaction.getNominalCode(), (key, val) -> {
-                    return transaction.getAmount().add(val);
-                });
-                results.putIfAbsent(transaction.getNominalCode(), transaction.getAmount());
-
+        transactions.forEach(transaction ->
+        {
+            results.computeIfPresent(transaction.getNominalCode(), (key, val) -> {
+                return transaction.getAmount().add(val);
             });
+            results.putIfAbsent(transaction.getNominalCode(), transaction.getAmount());
+        });
 
         return results;
     }

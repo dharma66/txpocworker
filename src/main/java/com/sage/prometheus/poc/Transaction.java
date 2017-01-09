@@ -4,9 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.math.BigDecimal;
 
-/**
- * Created by phil on 20/12/16.
- */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Transaction
 {
