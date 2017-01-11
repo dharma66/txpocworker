@@ -14,42 +14,33 @@ import java.util.concurrent.Future;
 public class Receiver
 {
     private static final Logger logger = LoggerFactory.getLogger(Receiver.class);
+
     private final ExecutorService service;
+    private final SummaryRepository repo;
+
     private static final int MAX_WORKERS = 1;
 
-    public Receiver(ExecutorService service)
+    @Autowired
+    public Receiver(ExecutorService service, SummaryRepository repo)
     {
         this.service = service;
+        this.repo = repo;
     }
-
-    @Autowired
-    private SummaryRepository repo;
 
     public void receiveMessage(String requestId) throws Exception
     {
         try
         {
             logger.info("Received requestId: " + requestId);
-            long start = System.currentTimeMillis();
 
             List<Future<List<Transaction>>> futures = setupWorkers();
 
             awaitResults(futures);
 
-            long end = System.currentTimeMillis();
-            logger.info("Got data in: " + (end - start) + "ms");
-
-            start = System.currentTimeMillis();
-
-
             Map<String, BigDecimal> aggregatedNominals = collectResults(futures);
+
             Summary summary = new Summary(requestId, aggregatedNominals);
             repo.save(summary);
-
-            end = System.currentTimeMillis();
-            logger.info("Aggregated data in: " + (end - start) + "ms");
-            //logger.info("Aggregated data:");
-            //logger.info(new PrettyPrintMap(aggregatedNominals).toString());
         }
         catch(Exception e)
         {

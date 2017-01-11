@@ -9,23 +9,16 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-/**
- * Created by phil on 17/12/16.
- */
 @Component
 public class Runner implements CommandLineRunner
 {
     private static final Logger logger = LoggerFactory.getLogger(Runner.class);
 
     private final RabbitTemplate rabbitTemplate;
-    private final Receiver receiver;
-    private final ConfigurableApplicationContext context;
 
-    public Runner(Receiver receiver, RabbitTemplate rabbitTemplate, ConfigurableApplicationContext conext)
+    public Runner(RabbitTemplate rabbitTemplate)
     {
-        this.receiver = receiver;
         this.rabbitTemplate = rabbitTemplate;
-        this.context = conext;
     }
 
     @Override
@@ -39,10 +32,9 @@ public class Runner implements CommandLineRunner
         {
             String uuid = UUID.randomUUID().toString();
             rabbitTemplate.convertAndSend(WorkerApplication.queueName, uuid);
-            logger.info("Posted mesage:    " + uuid);
+            logger.info("Posted message:    " + uuid);
         }
 
         logger.info("Messages posted in " + (System.currentTimeMillis() - start) + "ms");
-        //context.close();
     }
 }

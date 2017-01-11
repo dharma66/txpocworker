@@ -13,9 +13,13 @@ public class Summary
     public Summary(String requestId, Map<String, BigDecimal> nominals)
     {
         this.requestId = requestId;
-        nominals.forEach((key, value) -> {
-            this.aggregatedNominals.add(new AggregatedNominal(key, value));
-        });
+        if(nominals != null)
+        {
+            nominals.forEach((key, value) ->
+            {
+                this.aggregatedNominals.add(new AggregatedNominal(key, value));
+            });
+        }
     }
 
     public String getRequestId()
