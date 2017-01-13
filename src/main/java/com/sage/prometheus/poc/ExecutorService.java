@@ -29,7 +29,8 @@ public class ExecutorService
     private static final Logger logger = LoggerFactory.getLogger(ExecutorService.class);
     private static final boolean stub = false;
 
-    private static final long MAX_PAGES = 1; //Long.MAX_VALUE;
+    private static final String pageSize = "100";
+    private static final long MAX_PAGES = 4; //Long.MAX_VALUE;
 
     @Async
     public Future<List<Transaction>> getTransactions(int pageStep, int offset) throws InterruptedException
@@ -54,7 +55,7 @@ public class ExecutorService
     {
         long page = offset;
 
-        String uri = String.format("http://localhost:8080/transactions?size=1000&page=%d", page);
+        String uri = String.format("http://localhost:8080/transactions?size=" + pageSize +"page=%d", page);
 
         RestTemplate template = restTemplate();
 
@@ -71,7 +72,7 @@ public class ExecutorService
         while(page + pageStep < totalPages)
         {
             page = page + pageStep;
-            uri = String.format("http://localhost:8080/transactions?size=1000&page=%d", page);
+            uri = String.format("http://localhost:8080/transactions?size=\" + pageSize +\"&page=%d", page);
             getPageData(uri, template, transactions);
             logger.info("Got page: " + page);
         }
