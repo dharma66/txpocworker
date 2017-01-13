@@ -17,14 +17,16 @@ public class Receiver
 
     private final ExecutorService service;
     private final SummaryRepository repo;
+    private final Responder responder;
 
-    private static final int MAX_WORKERS = 1;
+    private static final int MAX_WORKERS = 4;
 
     @Autowired
-    public Receiver(ExecutorService service, SummaryRepository repo)
+    public Receiver(ExecutorService service, SummaryRepository repo, Responder responder)
     {
         this.service = service;
         this.repo = repo;
+        this.responder = responder;
     }
 
     public void receiveMessage(String requestId) throws Exception
@@ -40,7 +42,8 @@ public class Receiver
             Map<String, BigDecimal> aggregatedNominals = collectResults(futures);
 
             Summary summary = new Summary(requestId, aggregatedNominals);
-            repo.save(summary);
+            //repo.save(summary);
+            responder.send(requestId);
         }
         catch(Exception e)
         {

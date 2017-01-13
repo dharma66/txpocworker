@@ -21,12 +21,13 @@ import java.util.concurrent.Executor;
 @EnableAsync
 public class WorkerApplication extends AsyncConfigurerSupport
 {
-    final static String queueName = "worker-queue";
+    final static String readQueueName = "worker-queue";
+    final static String postQueueName = "response-queue";
 
     @Bean
     Queue queue()
     {
-        return new Queue(queueName, false);
+        return new Queue(readQueueName, false);
     }
 
     @Bean
@@ -38,7 +39,7 @@ public class WorkerApplication extends AsyncConfigurerSupport
     @Bean
     Binding binding(Queue queue, TopicExchange exchange)
     {
-        return BindingBuilder.bind(queue).to(exchange).with(queueName);
+        return BindingBuilder.bind(queue).to(exchange).with(readQueueName);
     }
 
     @Bean
@@ -46,7 +47,7 @@ public class WorkerApplication extends AsyncConfigurerSupport
     {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
-        container.setQueueNames(queueName);
+        container.setQueueNames(readQueueName);
         container.setMessageListener(listenerAdapter);
         container.setConcurrentConsumers(4);
 
