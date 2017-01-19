@@ -1,15 +1,15 @@
 package com.sage.prometheus.poc;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
 
-class SummaryTest
+public class SummaryTest
 {
     @Test
     public void testConstructorOk()

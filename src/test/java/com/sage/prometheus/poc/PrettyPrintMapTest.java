@@ -1,16 +1,16 @@
 package com.sage.prometheus.poc;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.util.Map;
 import java.util.TreeMap;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
 
-class PrettyPrintMapTest
+public class PrettyPrintMapTest
 {
     @Test
-    void testToString()
+    public void testToString()
     {
         Map<String, String> map = new TreeMap<>();
 

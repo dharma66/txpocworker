@@ -4,6 +4,7 @@ import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
@@ -23,6 +24,11 @@ public class WorkerApplication extends AsyncConfigurerSupport
 {
     final static String readQueueName = "worker-queue";
     final static String postQueueName = "response-queue";
+
+    @Bean ConnectionFactory connectionFactory()
+    {
+        return new CachingConnectionFactory("queue", 5672);
+    }
 
     @Bean
     Queue queue()
@@ -46,6 +52,7 @@ public class WorkerApplication extends AsyncConfigurerSupport
     SimpleMessageListenerContainer container(ConnectionFactory connectionFactory, MessageListenerAdapter listenerAdapter)
     {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+
         container.setConnectionFactory(connectionFactory);
         container.setQueueNames(readQueueName);
         container.setMessageListener(listenerAdapter);

@@ -29,8 +29,8 @@ public class ExecutorService
     private static final Logger logger = LoggerFactory.getLogger(ExecutorService.class);
     private static final boolean stub = false;
 
-    private static final String pageSize = "100";
-    private static final long MAX_PAGES = 4; //Long.MAX_VALUE;
+    private static final String pageSize = "500";
+    private static final long MAX_PAGES = 2; //Long.MAX_VALUE;
 
     @Async
     public Future<List<Transaction>> getTransactions(int pageStep, int offset) throws InterruptedException
@@ -55,29 +55,30 @@ public class ExecutorService
     {
         long page = offset;
 
-        String uri = String.format("http://localhost:8080/transactions?size=" + pageSize +"page=%d", page);
+        String uri = String.format("http://content:8080/transactions?size=" + pageSize +"&page=%d", page);
 
         RestTemplate template = restTemplate();
 
+        long start = System.currentTimeMillis();
         ResponseEntity<PagedResources<Transaction>> result = template.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<PagedResources<Transaction>>(){});
         PagedResources<Transaction> resources = result.getBody();
+
+        System.out.println("time to read page = " + (start - System.currentTimeMillis()) + "ms");
 
         long totalPages = resources.getMetadata().getTotalPages();
         if(MAX_PAGES < totalPages) totalPages = MAX_PAGES;
 
-        logger.info("Got page: " + page);
+
 
         List<Transaction> transactions = new ArrayList<>(resources.getContent());
 
-        while(page + pageStep < totalPages)
+        while(page + pageStep <= totalPages)
         {
             page = page + pageStep;
-            uri = String.format("http://localhost:8080/transactions?size=\" + pageSize +\"&page=%d", page);
+            uri = String.format("http://content:8080/transactions?size=" + pageSize +"&page=%d", page);
             getPageData(uri, template, transactions);
-            logger.info("Got page: " + page);
         }
 
-        logger.info("Got a total of " + transactions.size() + " transactions");
         return new AsyncResult<>(transactions);
     }
 

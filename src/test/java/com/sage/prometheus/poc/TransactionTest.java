@@ -1,15 +1,15 @@
 package com.sage.prometheus.poc;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
 
-class TransactionTest
+public  class TransactionTest
 {
     @Test
-    void getNominalCode()
+    public void getNominalCode()
     {
         Transaction tx = new Transaction();
 
@@ -18,7 +18,7 @@ class TransactionTest
     }
 
     @Test
-    void getDescription()
+    public void getDescription()
     {
         Transaction tx = new Transaction();
 
@@ -27,24 +27,24 @@ class TransactionTest
     }
 
     @Test
-    void getAmount()
+    public void getAmount()
     {
         Transaction tx = new Transaction();
 
         tx.setAmount(BigDecimal.valueOf(123.45));
-        assertEquals(123.45, tx.getAmount().doubleValue());
+        assertEquals(123.45, tx.getAmount().doubleValue(), 0.005);
     }
 
     @Test
-    void unsetNominalCodeIsEmptyString()
+    public void unsetNominalCodeIsEmptyString()
     {
         Transaction tx = new Transaction();
 
-        assertTrue(tx.getNominalCode().isEmpty());
+        assertEquals(true, tx.getNominalCode().isEmpty());
     }
 
     @Test
-    void unsetAmountCodeIsZero()
+    public void unsetAmountCodeIsZero()
     {
         Transaction tx = new Transaction();
 

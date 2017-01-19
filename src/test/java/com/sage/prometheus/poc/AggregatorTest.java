@@ -1,18 +1,18 @@
 package com.sage.prometheus.poc;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
 
-class AggregatorTest
+public class AggregatorTest
 {
     @Test
-    void aggregateNothing()
+    public void aggregateNothing()
     {
         List<Transaction> transactions = new ArrayList<>();
         Map<String, BigDecimal> results = Aggregator.aggregate(transactions);
@@ -20,7 +20,7 @@ class AggregatorTest
     }
 
     @Test
-    void aggregateSingleTransaction()
+    public void aggregateSingleTransaction()
     {
         List<Transaction> transactions = new ArrayList<>();
 
@@ -33,12 +33,12 @@ class AggregatorTest
 
         Map<String, BigDecimal> results = Aggregator.aggregate(transactions);
         assertEquals(1, results.size());
-        assertTrue(results.containsKey("XYZ"));
+        assertEquals(true, results.containsKey("XYZ"));
         assertEquals(BigDecimal.valueOf(123.45), results.get("XYZ"));
     }
 
     @Test
-    void noDescriptionRequired()
+    public void noDescriptionRequired()
     {
         List<Transaction> transactions = new ArrayList<>();
 
@@ -50,12 +50,12 @@ class AggregatorTest
 
         Map<String, BigDecimal> results = Aggregator.aggregate(transactions);
         assertEquals(1, results.size());
-        assertTrue(results.containsKey("XYZ"));
+        assertEquals(true, results.containsKey("XYZ"));
         assertEquals(BigDecimal.valueOf(123.45), results.get("XYZ"));
     }
 
     @Test
-    void matchingCodesAggragated()
+    public void matchingCodesAggragated()
     {
         List<Transaction> transactions = new ArrayList<>();
 
@@ -73,12 +73,12 @@ class AggregatorTest
 
         Map<String, BigDecimal> results = Aggregator.aggregate(transactions);
         assertEquals(1, results.size());
-        assertTrue(results.containsKey("XYZ"));
+        assertEquals(true, results.containsKey("XYZ"));
         assertEquals(BigDecimal.valueOf(246.90).setScale(2), results.get("XYZ"));
     }
 
     @Test
-    void nonMatchingCodesNotAggragated()
+    public void nonMatchingCodesNotAggragated()
     {
         List<Transaction> transactions = new ArrayList<>();
 
@@ -96,15 +96,15 @@ class AggregatorTest
 
         Map<String, BigDecimal> results = Aggregator.aggregate(transactions);
         assertEquals(2, results.size());
-        assertTrue(results.containsKey("XYZ"));
+        assertEquals(true, results.containsKey("XYZ"));
         assertEquals(BigDecimal.valueOf(100.00).setScale(2), results.get("XYZ"));
-        assertTrue(results.containsKey("ABC"));
+        assertEquals(true, results.containsKey("ABC"));
         assertEquals(BigDecimal.valueOf(200.00).setScale(2), results.get("ABC"));
 
     }
 
     @Test
-    void missingNomCodesAggregated()
+    public void missingNomCodesAggregated()
     {
         List<Transaction> transactions = new ArrayList<>();
 
@@ -120,12 +120,12 @@ class AggregatorTest
 
         Map<String, BigDecimal> results = Aggregator.aggregate(transactions);
         assertEquals(1, results.size());
-        assertTrue(results.containsKey(""));
+        assertEquals(true, results.containsKey(""));
         assertEquals(BigDecimal.valueOf(300.00).setScale(2), results.get(""));
     }
 
     @Test
-    void missingAmountIsZero()
+    public void missingAmountIsZero()
     {
         List<Transaction> transactions = new ArrayList<>();
 
@@ -136,12 +136,12 @@ class AggregatorTest
 
         Map<String, BigDecimal> results = Aggregator.aggregate(transactions);
         assertEquals(1, results.size());
-        assertTrue(results.containsKey("XYZ"));
+        assertEquals(true, results.containsKey("XYZ"));
         assertEquals(BigDecimal.valueOf(0.00).setScale(2), results.get("XYZ"));
     }
 
     @Test
-    void negativeAmountsAreSubtracted()
+    public void negativeAmountsAreSubtracted()
     {
         List<Transaction> transactions = new ArrayList<>();
 
@@ -159,7 +159,7 @@ class AggregatorTest
 
         Map<String, BigDecimal> results = Aggregator.aggregate(transactions);
         assertEquals(1, results.size());
-        assertTrue(results.containsKey("XYZ"));
+        assertEquals(true, results.containsKey("XYZ"));
         assertEquals(BigDecimal.valueOf(100.00).setScale(2), results.get("XYZ"));
     }
 }

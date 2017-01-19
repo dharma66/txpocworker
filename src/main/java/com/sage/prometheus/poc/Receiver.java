@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -19,7 +20,7 @@ public class Receiver
     private final SummaryRepository repo;
     private final Responder responder;
 
-    private static final int MAX_WORKERS = 4;
+    private static final int MAX_WORKERS = 2;
 
     @Autowired
     public Receiver(ExecutorService service, SummaryRepository repo, Responder responder)
@@ -33,8 +34,6 @@ public class Receiver
     {
         try
         {
-            logger.info("Received requestId: " + requestId);
-
             List<Future<List<Transaction>>> futures = setupWorkers();
 
             awaitResults(futures);
@@ -42,8 +41,10 @@ public class Receiver
             Map<String, BigDecimal> aggregatedNominals = collectResults(futures);
 
             Summary summary = new Summary(requestId, aggregatedNominals);
-            //repo.save(summary);
-            responder.send(requestId);
+
+            repo.save(summary);
+            String end = Instant.now().toString();
+            responder.send(String.format("{ \"requestId\": \"%s\", \"completed\": \"%s\" }", requestId, end));
         }
         catch(Exception e)
         {
@@ -101,6 +102,7 @@ public class Receiver
             }
         });
 
+        System.out.println("transactions.size = " + transactions.size());
         return Aggregator.aggregate(transactions);
     }
 }
