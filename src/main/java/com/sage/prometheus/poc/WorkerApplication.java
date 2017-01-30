@@ -24,11 +24,12 @@ public class WorkerApplication extends AsyncConfigurerSupport
 {
     final static String readQueueName = "worker-queue";
     final static String postQueueName = "response-queue";
+    final static String queueHost = "localhost";
 
-    @Bean ConnectionFactory connectionFactory()
-    {
-        return new CachingConnectionFactory("queue", 5672);
-    }
+//    @Bean ConnectionFactory connectionFactory()
+//    {
+//        return new CachingConnectionFactory(queueHost, 5672 );
+//    }
 
     @Bean
     Queue queue()
@@ -74,7 +75,7 @@ public class WorkerApplication extends AsyncConfigurerSupport
         executor.setCorePoolSize(8);
         executor.setMaxPoolSize(8);
         executor.setQueueCapacity(500);
-        executor.setThreadNamePrefix("PromotheusExecutor-");
+        executor.setThreadNamePrefix("PrometheusExecutor-");
         executor.initialize();
 
         return executor;

@@ -1,5 +1,6 @@
 package com.sage.prometheus.poc;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ public class Receiver
     private final SummaryRepository repo;
     private final Responder responder;
 
-    private static final int MAX_WORKERS = 2;
+    private static final int MAX_WORKERS = 1;
 
     @Autowired
     public Receiver(ExecutorService service, SummaryRepository repo, Responder responder)
@@ -30,11 +31,19 @@ public class Receiver
         this.responder = responder;
     }
 
-    public void receiveMessage(String requestId) throws Exception
+    public void receiveMessage(String request) throws Exception
     {
+        logger.info("*******************************");
+        logger.info(request);
         try
         {
-            List<Future<List<Transaction>>> futures = setupWorkers();
+            ObjectMapper mapper = new ObjectMapper();
+            RequestMessage msg = mapper.readValue(request, RequestMessage.class);
+
+            String requestId = msg.requestId;
+            int numTransactions = Integer.parseInt(msg.numTransactions);
+
+            List<Future<List<Transaction>>> futures = setupWorkers(numTransactions);
 
             awaitResults(futures);
 
@@ -44,6 +53,7 @@ public class Receiver
 
             repo.save(summary);
             String end = Instant.now().toString();
+
             responder.send(String.format("{ \"requestId\": \"%s\", \"completed\": \"%s\" }", requestId, end));
         }
         catch(Exception e)
@@ -53,13 +63,13 @@ public class Receiver
         }
     }
 
-    private List<Future<List<Transaction>>> setupWorkers() throws InterruptedException
+    private List<Future<List<Transaction>>> setupWorkers(int numTransactions) throws InterruptedException
     {
         List<Future<List<Transaction>>> futures = new ArrayList<>();
 
         for(int i = 0; i < MAX_WORKERS; i++)
         {
-            futures.add(service.getTransactions(MAX_WORKERS, i + 1));
+            futures.add(service.getTransactions(numTransactions, MAX_WORKERS, i + 1));
         }
         return futures;
     }
@@ -102,7 +112,9 @@ public class Receiver
             }
         });
 
-        System.out.println("transactions.size = " + transactions.size());
+        System.out.println("************* transactions.size = " + transactions.size());
         return Aggregator.aggregate(transactions);
     }
+
+
 }

@@ -28,54 +28,41 @@ public class ExecutorService
 {
     private static final Logger logger = LoggerFactory.getLogger(ExecutorService.class);
     private static final boolean stub = false;
+    private static final String contentHost = "localhost";
 
-    private static final String pageSize = "500";
-    private static final long MAX_PAGES = 2; //Long.MAX_VALUE;
+    private static final String pageSize = "1000";
 
     @Async
-    public Future<List<Transaction>> getTransactions(int pageStep, int offset) throws InterruptedException
+    public Future<List<Transaction>> getTransactions(int numTransactions, int pageStep, int offset) throws InterruptedException
     {
-        if(offset <= MAX_PAGES)
+        if (stub)
         {
-            if (stub)
-            {
-                return pretendToReadData(pageStep, offset);
-            } else
-            {
-                return readData(pageStep, offset);
-            }
-        }
-        else
+            return pretendToReadData(pageStep, offset);
+        } else
         {
-            return new AsyncResult<>(new ArrayList<>());
+            return readData(numTransactions, pageStep, offset);
         }
     }
 
-    private Future<List<Transaction>> readData(int pageStep, int offset)
+    private Future<List<Transaction>> readData(int numTransactions, int pageStep, int offset)
     {
         long page = offset;
 
-        String uri = String.format("http://content:8080/transactions?size=" + pageSize +"&page=%d", page);
+        String uri = String.format("http://" + contentHost + ":8080/transactions?size=" + pageSize +"&page=%d", page);
 
         RestTemplate template = restTemplate();
 
-        long start = System.currentTimeMillis();
         ResponseEntity<PagedResources<Transaction>> result = template.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<PagedResources<Transaction>>(){});
         PagedResources<Transaction> resources = result.getBody();
 
-        System.out.println("time to read page = " + (start - System.currentTimeMillis()) + "ms");
-
-        long totalPages = resources.getMetadata().getTotalPages();
-        if(MAX_PAGES < totalPages) totalPages = MAX_PAGES;
-
-
+        long totalPages = numTransactions / Integer.parseInt(pageSize);
 
         List<Transaction> transactions = new ArrayList<>(resources.getContent());
 
-        while(page + pageStep <= totalPages)
+        while(page + pageStep < totalPages)
         {
             page = page + pageStep;
-            uri = String.format("http://content:8080/transactions?size=" + pageSize +"&page=%d", page);
+            uri = String.format("http://" + contentHost + ":8080/transactions?size=" + pageSize +"&page=%d", page);
             getPageData(uri, template, transactions);
         }
 
