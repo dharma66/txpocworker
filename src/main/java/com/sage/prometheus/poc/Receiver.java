@@ -41,7 +41,7 @@ public class Receiver
             RequestMessage msg = mapper.readValue(request, RequestMessage.class);
 
             String requestId = msg.requestId;
-            int numTransactions = Integer.parseInt(msg.numTransactions);
+            int numTransactions = Integer.parseInt(msg.transactionCount);
 
             List<Future<List<Transaction>>> futures = setupWorkers(numTransactions);
 

@@ -6,5 +6,5 @@ package com.sage.prometheus.poc;
 class RequestMessage
 {
     public String requestId;
-    public String numTransactions;
+    public String transactionCount;
 }

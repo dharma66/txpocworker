@@ -22,19 +22,19 @@ import java.util.concurrent.Executor;
 @EnableAsync
 public class WorkerApplication extends AsyncConfigurerSupport
 {
-    final static String readQueueName = "worker-queue";
-    final static String postQueueName = "response-queue";
-    final static String queueHost = "localhost";
+    final static String readQueueName = "content";
+    final static String postQueueName = "content-processed";
+    final static String queueHost = "queue";
 
-//    @Bean ConnectionFactory connectionFactory()
-//    {
-//        return new CachingConnectionFactory(queueHost, 5672 );
-//    }
+    @Bean ConnectionFactory connectionFactory()
+    {
+        return new CachingConnectionFactory(queueHost, 5672 );
+    }
 
     @Bean
     Queue queue()
     {
-        return new Queue(readQueueName, false);
+        return new Queue(readQueueName, true);
     }
 
     @Bean

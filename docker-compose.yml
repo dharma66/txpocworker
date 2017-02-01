@@ -1,0 +1,43 @@
+version: '2'
+
+services:
+  content:
+    image: jcontent-service
+    ports:
+      - '8080:8080'
+    environment:
+      STORE_HOST: store
+    links:
+      - store
+
+  worker:
+    image: jworker-service
+    links:
+      - content
+      - store
+      - queue
+      
+  client:
+    image: worker-service
+    command: node ./build/src/main/run.js --jobs=100 --transactions=1000 
+    environment:
+      ENABLE_LOGGING: 'true'
+      CONTENT_SERVICE_HOST: jcontent:8080
+      QUEUE_HOST: queue
+      WAIT_FOR_QUEUE: '8000'
+      PROCESS_COUNT: '4'
+      STORE_HOST: store
+      STORE_PORT: '27017'
+    links:
+      - queue
+      - content
+     
+  queue:
+    image: rabbitmq:3.5.0-management
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+  store:
+    image: mongo:3.4.1
+    ports:
+      - '27017:27017'
