@@ -28,9 +28,9 @@ public class ExecutorService
 {
     private static final Logger logger = LoggerFactory.getLogger(ExecutorService.class);
     private static final boolean stub = false;
-    private static final String contentHost = "localhost";
+    private static final String contentHost = "content";
 
-    private static final String pageSize = "1000";
+    private static String pageSize = "100000";
 
     @Async
     public Future<List<Transaction>> getTransactions(int numTransactions, int pageStep, int offset) throws InterruptedException
@@ -47,9 +47,11 @@ public class ExecutorService
     private Future<List<Transaction>> readData(int numTransactions, int pageStep, int offset)
     {
         long page = offset;
+        pageSize = String.valueOf(numTransactions);
 
         String uri = String.format("http://" + contentHost + ":8080/transactions?size=" + pageSize +"&page=%d", page);
 
+        System.out.println("uri = " + uri);
         RestTemplate template = restTemplate();
 
         ResponseEntity<PagedResources<Transaction>> result = template.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<PagedResources<Transaction>>(){});
@@ -59,6 +61,7 @@ public class ExecutorService
 
         List<Transaction> transactions = new ArrayList<>(resources.getContent());
 
+        System.out.println("transactions.size() = " + transactions.size());
         while(page + pageStep < totalPages)
         {
             page = page + pageStep;

@@ -4,6 +4,7 @@ import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
@@ -20,6 +21,7 @@ import java.util.concurrent.Executor;
 
 @SpringBootApplication
 @EnableAsync
+@EnableRabbit
 public class WorkerApplication extends AsyncConfigurerSupport
 {
     final static String readQueueName = "content";
@@ -57,7 +59,7 @@ public class WorkerApplication extends AsyncConfigurerSupport
         container.setConnectionFactory(connectionFactory);
         container.setQueueNames(readQueueName);
         container.setMessageListener(listenerAdapter);
-        container.setConcurrentConsumers(4);
+        container.setConcurrentConsumers(64);
 
         return container;
     }
@@ -72,9 +74,9 @@ public class WorkerApplication extends AsyncConfigurerSupport
     public Executor getAsyncExecutor()
     {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(8);
+        executor.setCorePoolSize(2);
         executor.setMaxPoolSize(8);
-        executor.setQueueCapacity(500);
+        executor.setQueueCapacity(5000);
         executor.setThreadNamePrefix("PrometheusExecutor-");
         executor.initialize();
 

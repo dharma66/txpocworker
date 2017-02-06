@@ -21,7 +21,7 @@ public class Receiver
     private final SummaryRepository repo;
     private final Responder responder;
 
-    private static final int MAX_WORKERS = 1;
+    private static final int MAX_WORKERS = 2;
 
     @Autowired
     public Receiver(ExecutorService service, SummaryRepository repo, Responder responder)
@@ -31,10 +31,8 @@ public class Receiver
         this.responder = responder;
     }
 
-    public void receiveMessage(String request) throws Exception
+    public void receiveMessage(byte[] request) throws Exception
     {
-        logger.info("*******************************");
-        logger.info(request);
         try
         {
             ObjectMapper mapper = new ObjectMapper();
@@ -69,7 +67,7 @@ public class Receiver
 
         for(int i = 0; i < MAX_WORKERS; i++)
         {
-            futures.add(service.getTransactions(numTransactions, MAX_WORKERS, i + 1));
+            futures.add(service.getTransactions(numTransactions, MAX_WORKERS, 0));
         }
         return futures;
     }
@@ -90,7 +88,7 @@ public class Receiver
                     someNotDone = true;
 
             }
-            Thread.sleep(10);
+            Thread.sleep(5);
         }
     }
 
@@ -112,9 +110,7 @@ public class Receiver
             }
         });
 
-        System.out.println("************* transactions.size = " + transactions.size());
+        System.out.println("Transactions read: " + transactions.size());
         return Aggregator.aggregate(transactions);
     }
-
-
 }

@@ -19,10 +19,10 @@ services:
       
   client:
     image: worker-service
-    command: node ./build/src/main/run.js --jobs=100 --transactions=1000 
+    command: node ./build/src/main/run.js --jobs=1000 --transactions=1000 --create=true
     environment:
       ENABLE_LOGGING: 'true'
-      CONTENT_SERVICE_HOST: jcontent:8080
+      CONTENT_SERVICE_HOST: content:8080
       QUEUE_HOST: queue
       WAIT_FOR_QUEUE: '8000'
       PROCESS_COUNT: '4'
