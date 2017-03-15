@@ -19,7 +19,7 @@ services:
       
   client:
     image: worker-service
-    command: node ./build/src/main/run.js --jobs=1000 --transactions=1000 --create=true
+    command: node ./build/src/main/run.js --jobs=10000 --transactions=1000 --create=true
     environment:
       ENABLE_LOGGING: 'true'
       CONTENT_SERVICE_HOST: content:8080

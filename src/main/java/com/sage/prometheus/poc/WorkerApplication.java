@@ -70,18 +70,18 @@ public class WorkerApplication extends AsyncConfigurerSupport
         return new MessageListenerAdapter(receiver, "receiveMessage");
     }
 
-    @Override
-    public Executor getAsyncExecutor()
-    {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(2);
-        executor.setMaxPoolSize(8);
-        executor.setQueueCapacity(5000);
-        executor.setThreadNamePrefix("PrometheusExecutor-");
-        executor.initialize();
-
-        return executor;
-    }
+//    @Override
+//    public Executor getAsyncExecutor()
+//    {
+//        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+//        executor.setCorePoolSize(2);
+//        executor.setMaxPoolSize(8);
+//        executor.setQueueCapacity(5000);
+//        executor.setThreadNamePrefix("PrometheusExecutor-");
+//        executor.initialize();
+//
+//        return executor;
+//    }
 
 	public static void main(String[] args) {
 		SpringApplication.run(WorkerApplication.class, args);

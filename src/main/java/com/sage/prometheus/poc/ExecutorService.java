@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.concurrent.Future;
 
 
-@Service
+//@Service
 public class ExecutorService
 {
     private static final Logger logger = LoggerFactory.getLogger(ExecutorService.class);
@@ -49,23 +49,21 @@ public class ExecutorService
         long page = offset;
         pageSize = String.valueOf(numTransactions);
 
-        String uri = String.format("http://" + contentHost + ":8080/transactions?size=" + pageSize +"&page=%d", page);
+        String uri = String.format("http://" + contentHost + ":8080/transactions");
 
         System.out.println("uri = " + uri);
         RestTemplate template = restTemplate();
 
-        ResponseEntity<PagedResources<Transaction>> result = template.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<PagedResources<Transaction>>(){});
-        PagedResources<Transaction> resources = result.getBody();
+        ResponseEntity<List<Transaction>> result = template.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<List<Transaction>>(){});
+        List<Transaction> transactions = result.getBody();
 
         long totalPages = numTransactions / Integer.parseInt(pageSize);
-
-        List<Transaction> transactions = new ArrayList<>(resources.getContent());
 
         System.out.println("transactions.size() = " + transactions.size());
         while(page + pageStep < totalPages)
         {
             page = page + pageStep;
-            uri = String.format("http://" + contentHost + ":8080/transactions?size=" + pageSize +"&page=%d", page);
+            uri = String.format("http://" + contentHost + ":8080/transactions");
             getPageData(uri, template, transactions);
         }
 
